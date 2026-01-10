@@ -1,0 +1,199 @@
+{
+  "name": "n8n-basic-email-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2e729736-24c2-40a3-86ca-793f89b2d272",
+              "leftValue": "={{ $json.body.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "86105fb1-f763-4f36-972d-a59ee7c93c20",
+              "leftValue": "={{ $json.body.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        256,
+        -16
+      ],
+      "id": "ab9eb030-fe78-4e49-8a37-994e13b0ad9c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.RESEND_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": [\"{{ $('Email Trigger Hook').item.json.body.email }}\"],\n  \"subject\": \"Welcome to Our App 🚀\",\n  \"html\": \"<p>Hi {{ $('Email Trigger Hook').item.json.body.name }}.</p><p>Welcome! Thanks for signing up.</p><p>— The Team</p>\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        576,
+        -96
+      ],
+      "id": "4535fd00-4b04-4bad-ae1a-59bd18604d81",
+      "name": "Resend Email",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-email",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        16,
+        -16
+      ],
+      "id": "663f7a0d-7fad-4fee-9c53-334203047abf",
+      "name": "Email Trigger Hook",
+      "webhookId": "27c7c84b-e254-4034-bec8-f5815ee5b6f3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4oi6aCn561gDppfx",
+          "name": "x-n8n-secret"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"error\": \"UnAuthorized\"\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        576,
+        96
+      ],
+      "id": "8033002e-5a3b-4824-a3ac-8156d3f783c1",
+      "name": "Email Error Response",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"event\": \"Successful email send.\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        768,
+        -96
+      ],
+      "id": "94286968-1837-4172-b91d-7ced0c8613fe",
+      "name": "Email Success Response"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Resend Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Trigger Hook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resend Email": {
+      "main": [
+        [
+          {
+            "node": "Email Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "95f76771-4d6c-47ac-89c8-a945cd8e5a1f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ac972fe0bc10c2afb9418a02f7c1aa0c00bcb52d5cf904e725eca260f6ca27b9"
+  },
+  "id": "QQQVZ0mqPZ_tPSlKZvXDp",
+  "tags": []
+}
