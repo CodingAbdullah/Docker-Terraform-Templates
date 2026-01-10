@@ -12,6 +12,10 @@ A repository containing ready-to-deploy Terraform templates for provisioning AWS
         <td><code>docker-image-01-nextjs-supabase-setup</td>
         <td>Docker setup for a Next.js application implementing CRUD operations</td>
     </tr>
+    <tr>
+        <td><code>docker-image-02-nextjs-supabase-n8n-setup</td>
+        <td>Fully containerized Next.js/N8N application using Docker and docker-compose</td>
+    </tr>
 </table>
 
 <h1>Terraform</h1>
