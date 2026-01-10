@@ -1,5 +1,9 @@
 # Simple Next.js Development Dockerfile
 # Run the following command: docker build -t nextjs-crud-app . to build the image
+#
+# Note: This development Dockerfile runs as root for compatibility with
+# Docker volume mounts. For production, use a multi-stage build with
+# a non-root user and no volume mounts.
 
 FROM node:20-alpine
 
